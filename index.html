@@ -23,8 +23,8 @@
      other template-specific sections are dropped; only the hero / title / authors / affiliations
      / btn-fancy rules are kept. */
   :root {
-    --accent: #2563eb;
-    --accent-dark: #1d4ed8;
+    --accent: #ea580c;
+    --accent-dark: #c2410c;
     --accent-color: var(--accent);
     --primary-gradient: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
     --page-bg: #fcfcfc;
@@ -293,7 +293,7 @@
 /* prior-work output frame */
 :is(html.theme-dark,.pp-band) .seg-gen { background:transparent; border:1px solid #555; }
 /* SEGUE output: accent frame + faint accent fill, white-on-accent chip label */
-:is(html.theme-dark,.pp-band) .seg-gen.seg-ours { background:rgba(77,159,255,.08); border:2px solid var(--accent); }
+:is(html.theme-dark,.pp-band) .seg-gen.seg-ours { background:rgba(255,138,61,.08); border:2px solid var(--accent); }
 :is(html.theme-dark,.pp-band) .seg-gen.seg-ours>.seg-label { color:#fff; background:var(--accent); }
 
 /* media boxes, labels, no-endpoint placeholder, arrow (.seg-badge on media left unchanged) */
@@ -315,7 +315,7 @@
 /* supplementary links + footer box (accent-tinted dark card) */
 :is(html.theme-dark,.pp-band) .pp-supp-line { color:#9ca3af; }
 :is(html.theme-dark,.pp-band) .pp-supp-line a { color:var(--accent); }
-:is(html.theme-dark,.pp-band) .pp-footer-supp { background:rgba(77,159,255,.10); border:1px solid var(--accent); }
+:is(html.theme-dark,.pp-band) .pp-footer-supp { background:rgba(255,138,61,.10); border:1px solid var(--accent); }
 :is(html.theme-dark,.pp-band) .pp-footer-supp a { color:var(--accent); }
 
 /* BibTeX block */
