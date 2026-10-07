@@ -191,7 +191,7 @@
   border:1px solid color-mix(in srgb, var(--accent) 35%, #fff); border-radius:10px; padding:7px; }
 .seg-gen { background:#fafafb; border:1px solid #e5e7eb; border-radius:10px; padding:7px; }
 .seg-ref, .seg-endstack, .seg-startfull { background:#fff; border:1px solid #d1d5db; }
-.seg-gen.seg-ours { background:color-mix(in srgb, var(--accent) 6%, #fff); border:2px solid var(--accent); padding:6px; }
+.seg-gen.seg-ours { background:color-mix(in srgb, var(--accent) 5%, #fff); border:2px solid color-mix(in srgb, var(--accent) 55%, transparent); padding:6px; }
 .seg-gen.seg-ours>.seg-label { color:#fff; background:var(--accent); border-radius:999px; padding:2px 10px; font-weight:600; font-size:12px; }
 .seg-arrow { align-self:flex-start; display:flex; align-items:center; height:var(--seg-h); color:#9ca3af; font-size:22px; line-height:1; padding:0 2px; flex:none; }
 .seg-legend { color:#4b5563; }
@@ -223,7 +223,7 @@
   border:1px solid color-mix(in srgb, var(--accent) 30%, #fff); border-radius:14px; }
 .pp-footer-supp a { color:var(--accent-dark); }
 .pp-supp-line { color:#6b7280; }
-.pp-supp-line a { color:var(--accent-dark); }
+.pp-supp-line a { color:#6b7280; text-decoration:underline; text-decoration-color:#d1d5db; text-underline-offset:3px; }
 
 /* BibTeX block: white, grey border, dark copy button */
 .bibtex-block { position:relative; background:#fff; border:1px solid #e5e7eb; border-radius:12px;
@@ -293,7 +293,7 @@
 /* prior-work output frame */
 :is(html.theme-dark,.pp-band) .seg-gen { background:transparent; border:1px solid #555; }
 /* SEGUE output: accent frame + faint accent fill, white-on-accent chip label */
-:is(html.theme-dark,.pp-band) .seg-gen.seg-ours { background:rgba(255,138,61,.08); border:2px solid var(--accent); }
+:is(html.theme-dark,.pp-band) .seg-gen.seg-ours { background:rgba(255,138,61,.06); border:2px solid rgba(255,138,61,.5); }
 :is(html.theme-dark,.pp-band) .seg-gen.seg-ours>.seg-label { color:#fff; background:var(--accent); }
 
 /* media boxes, labels, no-endpoint placeholder, arrow (.seg-badge on media left unchanged) */
@@ -314,7 +314,7 @@
 
 /* supplementary links + footer box (accent-tinted dark card) */
 :is(html.theme-dark,.pp-band) .pp-supp-line { color:#9ca3af; }
-:is(html.theme-dark,.pp-band) .pp-supp-line a { color:var(--accent); }
+:is(html.theme-dark,.pp-band) .pp-supp-line a { color:#9ca3af; text-decoration-color:#4b5563; }
 :is(html.theme-dark,.pp-band) .pp-footer-supp { background:rgba(255,138,61,.10); border:1px solid var(--accent); }
 :is(html.theme-dark,.pp-band) .pp-footer-supp a { color:var(--accent); }
 
