@@ -23,8 +23,8 @@
      other template-specific sections are dropped; only the hero / title / authors / affiliations
      / btn-fancy rules are kept. */
   :root {
-    --accent: #ea580c;
-    --accent-dark: #c2410c;
+    --accent: #e66119;
+    --accent-dark: #b84e14;
     --accent-color: var(--accent);
     --primary-gradient: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
     --page-bg: #fcfcfc;
@@ -294,7 +294,7 @@
 :is(html.theme-dark,.pp-band) .seg-gen { background:transparent; border:1px solid #555; }
 /* SEGUE output: accent frame + faint accent fill, white-on-accent chip label */
 :is(html.theme-dark,.pp-band) .seg-gen.seg-ours { background:color-mix(in srgb, var(--accent) 8%, transparent); border:2px solid color-mix(in srgb, var(--accent) 55%, transparent); }
-:is(html.theme-dark,.pp-band) .seg-gen.seg-ours>.seg-label { color:#fff; background:var(--accent); }
+:is(html.theme-dark,.pp-band) .seg-gen.seg-ours>.seg-label { color:#111; background:var(--accent); }
 
 /* media boxes, labels, no-endpoint placeholder, arrow (.seg-badge on media left unchanged) */
 :is(html.theme-dark,.pp-band) .seg-media { background:#0b0b0d; border:1px solid #262626; }
@@ -425,7 +425,7 @@ html, body { max-width:100%; overflow-x:clip; }
 </style>
 <style id="pp-band-accent">
 /* the dark showcase band uses its own (lighter) accent so it reads on black */
-.pp-band { --accent: #ff8a3d; --accent-dark: #f97316; }
+.pp-band { --accent: #ec8852; --accent-dark: #e76a27; }
 </style>
 </head>
  <body>
