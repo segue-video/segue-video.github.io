@@ -23,8 +23,8 @@
      other template-specific sections are dropped; only the hero / title / authors / affiliations
      / btn-fancy rules are kept. */
   :root {
-    --accent: #ec8852;
-    --accent-dark: #e76a27;
+    --accent: #769bea;
+    --accent-dark: #487ae3;
     --accent-color: var(--accent);
     --primary-gradient: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
     --page-bg: #fcfcfc;
@@ -425,12 +425,16 @@ html, body { max-width:100%; overflow-x:clip; }
 </style>
 <style id="pp-band-accent">
 /* the dark showcase band uses its own (lighter) accent so it reads on black */
-.pp-band { --accent: #ec8852; --accent-dark: #e76a27; }
+.pp-band { --accent: #769bea; --accent-dark: #487ae3; }
 </style>
 <style id="pp-small-rows">
 /* rows kept at the fixed clip height (limitations on the results gallery) */
 .pp-small-rows .seg-cellsrow { overflow:visible; }
 .pp-small-rows .seg-arrow { height:auto; align-self:center; }
+</style>
+<style id="pp-title-plain">
+/* 2026-10-08: the SEGUE word in the title is plain (same colour as the rest); only the author names carry the accent */
+.publication-title-fancy .pp-accent { background:none !important; -webkit-background-clip:initial !important; background-clip:initial !important; -webkit-text-fill-color:inherit !important; color:inherit !important; }
 </style>
 </head>
  <body>
