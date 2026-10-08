@@ -106,7 +106,7 @@
   padding:2px 5px;border-radius:5px}
 .seg-label{font-size:13px;color:#aaa;text-align:center;line-height:1.3}
 @media (max-width:768px){.seg-section{--seg-h:220px}}
-/* comparison rows: keep all arms (incl. refVFX) on ONE row — horizontal overflow ok */
+/* comparison rows: keep all arms (incl. refVFX) on ONE row (horizontal overflow ok) */
 .seg-cellsrow{display:flex;flex-wrap:nowrap;gap:14px;align-items:flex-start;width:100%;overflow-x:auto;padding-bottom:6px}
 .seg-strip>.seg-cellsrow{flex:0 0 100%}
 /* gallery blocks: one human reference-class heading above each grouped block */
@@ -246,7 +246,7 @@
 /* ---- SEGUE dark palette (2026-10-07): ONE palette block that recolours the light
    project-page design for the dark theme. Scoped under :is(html.theme-dark,.pp-band) so both themes share this
    single template and differ ONLY in the <html> theme class and the injected accent values.
-   Layout, spacing, fonts, radii and shadow geometry are untouched — colour only. The accent is
+   Layout, spacing, fonts, radii and shadow geometry are untouched, colour only. The accent is
    read through var(--accent)/var(--accent-dark) (injected per theme), never written as a literal,
    so this block's text is identical on both pages and only takes effect on the dark one. ---- */
 
@@ -426,6 +426,11 @@ html, body { max-width:100%; overflow-x:clip; }
 <style id="pp-band-accent">
 /* the dark showcase band uses its own (lighter) accent so it reads on black */
 .pp-band { --accent: #ec8852; --accent-dark: #e76a27; }
+</style>
+<style id="pp-small-rows">
+/* rows kept at the fixed clip height (limitations on the results gallery) */
+.pp-small-rows .seg-cellsrow { overflow:visible; }
+.pp-small-rows .seg-arrow { height:auto; align-self:center; }
 </style>
 </head>
  <body>
