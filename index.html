@@ -23,8 +23,8 @@
      other template-specific sections are dropped; only the hero / title / authors / affiliations
      / btn-fancy rules are kept. */
   :root {
-    --accent: #ea580c;
-    --accent-dark: #c2410c;
+    --accent: #0F766E;
+    --accent-dark: #115E59;
     --accent-color: var(--accent);
     --primary-gradient: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
     --page-bg: #fcfcfc;
@@ -293,7 +293,7 @@
 /* prior-work output frame */
 :is(html.theme-dark,.pp-band) .seg-gen { background:transparent; border:1px solid #555; }
 /* SEGUE output: accent frame + faint accent fill, white-on-accent chip label */
-:is(html.theme-dark,.pp-band) .seg-gen.seg-ours { background:rgba(255,138,61,.06); border:2px solid rgba(255,138,61,.5); }
+:is(html.theme-dark,.pp-band) .seg-gen.seg-ours { background:rgba(45,212,191,.06); border:2px solid rgba(45,212,191,.5); }
 :is(html.theme-dark,.pp-band) .seg-gen.seg-ours>.seg-label { color:#fff; background:var(--accent); }
 
 /* media boxes, labels, no-endpoint placeholder, arrow (.seg-badge on media left unchanged) */
@@ -315,7 +315,7 @@
 /* supplementary links + footer box (accent-tinted dark card) */
 :is(html.theme-dark,.pp-band) .pp-supp-line { color:#9ca3af; }
 :is(html.theme-dark,.pp-band) .pp-supp-line a { color:#9ca3af; text-decoration-color:#4b5563; }
-:is(html.theme-dark,.pp-band) .pp-footer-supp { background:rgba(255,138,61,.10); border:1px solid var(--accent); }
+:is(html.theme-dark,.pp-band) .pp-footer-supp { background:rgba(45,212,191,.10); border:1px solid var(--accent); }
 :is(html.theme-dark,.pp-band) .pp-footer-supp a { color:var(--accent); }
 
 /* BibTeX block */
@@ -396,6 +396,14 @@ html, body { max-width:100%; overflow-x:clip; }
 .pp-method-intro { margin-bottom:6px; }
 .pp-method-p b { color:#1a1a1a; font-weight:600; }
 :is(html.theme-dark,.pp-band) .pp-method-p b { color:#f3f4f6; }
+</style>
+<style id="pp-buttons-row">
+/* header buttons on ONE row on desktop (2026-10-08): tighter pills, no wrapping above the phone breakpoint */
+@media (min-width:769px) {
+  .btn-fancy-container { flex-wrap:nowrap; gap:10px; }
+  .btn-fancy { padding:10px 18px; font-size:.95rem; white-space:nowrap; }
+  .btn-fancy .icon { margin-right:8px; }
+}
 </style>
 </head>
  <body>
