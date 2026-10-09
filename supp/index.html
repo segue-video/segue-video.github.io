@@ -346,7 +346,7 @@ html, body { max-width:100%; overflow-x:clip; }
 .seg-media, .seg-media video, .seg-media img.seg-still,
 .seg-ref, .seg-endstack, .seg-startfull, .seg-gen, .seg-gen.seg-ours,
 .seg-blockwrap, .seg-strip, .seg-refidx,
-.pp-method, .pp-method img, .pp-footer-supp, .bibtex-block { border-radius:0 !important; }
+.pp-method, .pp-method img, .pp-footer-supp, .bibtex-block, .pp-pager { border-radius:0 !important; }
 </style>
 <style id="pp-author-note">
 .aff-note { margin-top:8px; font-size:.9rem; color:#6b7280; }
@@ -432,6 +432,60 @@ html, body { max-width:100%; overflow-x:clip; }
 /* 2026-10-08: the SEGUE word in the title is plain (same colour as the rest); only the author names carry the accent */
 .publication-title-fancy .pp-accent { background:none !important; -webkit-background-clip:initial !important; background-clip:initial !important; -webkit-text-fill-color:inherit !important; color:inherit !important; }
 </style>
+<style id="pp-pager">
+/* Paged galleries (2026-10-09): the pager itself is ONE card; its rows sit flat inside it,
+   separated by a 1px divider, under a label bar. Light base chrome + a dark override that also
+   covers the showcase band. The flat-row rules are scoped under .pp-pager, so cards that are NOT
+   inside a pager (the guidance row, the results gallery) keep their own chrome. */
+.pp-pager { margin:22px 0; padding:16px 20px 14px; border-radius:0;
+  background:#fff; border:1px solid #ececf0; box-shadow:0 4px 10px rgba(16,24,40,.06); }
+.pp-pages { transition:opacity .16s ease; }
+.pp-pages.is-switching { opacity:0; }
+.pp-page[hidden] { display:none; }
+
+/* rows: flat inside the card, no divider (2026-10-09), spaced by padding only */
+.pp-pager .seg-blockwrap, .pp-pager .seg-strip,
+:is(html.theme-dark,.pp-band) .pp-pager .seg-blockwrap, :is(html.theme-dark,.pp-band) .pp-pager .seg-strip {
+  background:transparent; border:none; box-shadow:none; margin:0; padding:0; }
+.pp-row { padding:14px 0; }
+.pp-row + .pp-row { border-top:none; }
+.pp-page > .pp-row:first-child { padding-top:0; }
+.pp-page > .pp-row:last-child { padding-bottom:0; }
+.pp-row .pp-blockhead { margin:0 0 8px; }
+
+/* label bar: label (+ range) left, arrows + counter right; bottom bar centered */
+.pp-pagenav { font-family:'Google Sans', sans-serif; }
+.pp-pagenav-top { display:flex; justify-content:space-between; align-items:center; gap:10px;
+  flex-wrap:wrap; margin:0 0 8px; }
+.pp-pagenav-bottom { display:flex; justify-content:center; align-items:center; margin-top:12px; }
+.pp-pagerleft { display:flex; align-items:center; gap:10px; flex-wrap:wrap; min-width:0; }
+.pp-pagectrls { display:flex; align-items:center; gap:10px; }
+.pp-pagerlabel { font-size:12px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:#6b7280; }
+.pp-pagesep { color:#d1d5db; }
+.pp-pagecount, .pp-pagerange { color:#6b7280; font-size:13px; }
+.pp-pagecur { font-variant-numeric:tabular-nums; }
+
+.pp-pagebtn { width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center;
+  font-size:20px; line-height:1; padding:0; border-radius:0; cursor:pointer;
+  background:#fff; border:1px solid #d1d5db; color:#374151; }
+@media(hover:hover){ .pp-pagebtn:hover { border-color:var(--accent); color:var(--accent); } }
+.pp-pagebtn:disabled { opacity:.35; pointer-events:none; }
+
+/* dark theme + showcase band */
+:is(html.theme-dark,.pp-band) .pp-pager {
+  background:#121212; border:1px solid #262626; box-shadow:0 4px 12px rgba(0,0,0,.45); }
+:is(html.theme-dark,.pp-band) .pp-pagerlabel { color:#9ca3af; }
+:is(html.theme-dark,.pp-band) .pp-pagesep { color:#3a3a3a; }
+:is(html.theme-dark,.pp-band) .pp-pagecount,
+:is(html.theme-dark,.pp-band) .pp-pagerange { color:#9ca3af; }
+:is(html.theme-dark,.pp-band) .pp-pagebtn { background:#141414; border:1px solid #333; color:#d1d5db; }
+@media(hover:hover){ :is(html.theme-dark,.pp-band) .pp-pagebtn:hover { border-color:var(--accent); color:var(--accent); } }
+
+@media (max-width:768px) {
+  .pp-pager { padding:12px; }
+  .pp-pagebtn { width:32px; height:32px; }
+}
+</style>
 <title>SEGUE: Visual Signal as Exclusive Guidance for One-Shot Transition Effect Generation (results gallery)</title>
 <meta name="description" content="Full results gallery for SEGUE: transition effect generation and visual effect transfer, comparisons with previous work, guidance and limitations. Show SEGUE a transition effect in one reference clip, and it generates that effect between any two video clips. It reads the effect strictly from the visual reference, with no effect description in the prompt, and one model covers both two-sided transitions and single-sided visual effect transfer."/>
 <meta name="robots" content="index,follow,max-image-preview:large"/>
@@ -479,8 +533,9 @@ html, body { max-width:100%; overflow-x:clip; }
 
             const sources = v.querySelectorAll('source[data-src]');
             sources.forEach(s=>{
-              s.src = s.dataset.src;
-              s.removeAttribute('data-src');
+              // keep data-src so a paged-out clip can be released and reloaded later;
+              // only (re)assign src when it is currently empty
+              if (!s.getAttribute('src')) s.src = s.dataset.src;
             });
 
             if (v.preload === 'none') v.preload = 'metadata';
@@ -515,5 +570,105 @@ html, body { max-width:100%; overflow-x:clip; }
 
     })();
     </script>
+
+  <script>
+  /* Row pager (2026-10-09): one card per gallery/comparison group; pages of three rows with a
+     cross-fade on switch, media released when a page is hidden and the next page warmed ahead.
+     Coordinated with the lazy-video loader above, which keeps data-src and only sets src when
+     empty, so a source can be released and reloaded. Controls appear only for multi-page pagers. */
+  (function(){
+    const pagers = [];
+    function loadSources(v){
+      v.querySelectorAll('source[data-src]').forEach(s=>{ if(!s.getAttribute('src')) s.src = s.dataset.src; });
+    }
+    function warm(pg){
+      if(!pg) return;
+      pg.querySelectorAll('video.lazy-video').forEach(v=>{
+        loadSources(v); v.preload = 'auto'; v.muted = true; try{ v.load(); }catch(e){}
+      });
+    }
+    function release(pg){
+      if(!pg) return;
+      pg.querySelectorAll('video.lazy-video').forEach(v=>{
+        if(!v.paused) v.pause();
+        v.querySelectorAll('source').forEach(s=> s.removeAttribute('src'));
+        v.preload = 'none';
+        try{ v.load(); }catch(e){}
+      });
+    }
+    function initPager(pager){
+      const pagesEl = pager.querySelector('.pp-pages');
+      const pageDivs = Array.prototype.slice.call(pager.querySelectorAll('.pp-page'));
+      const pages = pageDivs.length;
+      const size = parseInt(pager.dataset.size, 10) || 3;
+      const total = parseInt(pager.dataset.total, 10) || pageDivs.length;
+      let cur = 1;
+      let warmTimer = null;
+
+      function updateNavs(){
+        pager.querySelectorAll('.pp-pagecur').forEach(el=>{ el.textContent = cur; });
+        const a = (cur - 1) * size + 1;
+        const b = Math.min(cur * size, total);
+        pager.querySelectorAll('.pp-pagerange').forEach(el=>{ el.textContent = 'Rows ' + a + '–' + b + ' of ' + total; });
+        pager.querySelectorAll('.pp-prev').forEach(btn=>{ btn.disabled = (cur === 1); });
+        pager.querySelectorAll('.pp-next').forEach(btn=>{ btn.disabled = (cur === pages); });
+      }
+      function scheduleWarm(){
+        if(warmTimer) clearTimeout(warmTimer);
+        warmTimer = setTimeout(()=>{ warm(pageDivs[cur]); }, 1500);   // pageDivs[cur] = page cur+1 (the next one)
+      }
+      function show(p){
+        if(p < 1 || p > pages || p === cur) return;
+        cur = p;
+        pagesEl.classList.add('is-switching');
+        setTimeout(()=>{
+          pageDivs.forEach((pg, i)=>{ pg.hidden = (i + 1 !== cur); });
+          // release every page that is neither the current one nor the one kept warm after it
+          pageDivs.forEach((pg, i)=>{ const n = i + 1; if(n !== cur && n !== cur + 1) release(pg); });
+          updateNavs();
+          pagesEl.classList.remove('is-switching');
+        }, 80);
+        const rect = pager.getBoundingClientRect();
+        if(rect.top < 0) pager.scrollIntoView({ behavior:'smooth', block:'start' });
+        scheduleWarm();
+      }
+
+      pager.querySelectorAll('.pp-prev').forEach(b=> b.addEventListener('click', ()=> show(cur - 1)));
+      pager.querySelectorAll('.pp-next').forEach(b=> b.addEventListener('click', ()=> show(cur + 1)));
+
+      if('ontouchstart' in window){
+        let sx = 0, sy = 0;
+        pagesEl.addEventListener('touchstart', e=>{ const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; }, { passive:true });
+        pagesEl.addEventListener('touchend', e=>{
+          const t = e.changedTouches[0]; const dx = t.clientX - sx, dy = t.clientY - sy;
+          if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) show(dx < 0 ? cur + 1 : cur - 1);
+        }, { passive:true });
+      }
+
+      updateNavs();
+      scheduleWarm();
+      pagers.push({ pager: pager, pages: pages, go: show, get cur(){ return cur; } });
+    }
+
+    document.querySelectorAll('.pp-pager').forEach(initPager);
+
+    document.addEventListener('keydown', e=>{
+      if(e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+      if(tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      const lb = document.getElementById('lightbox');
+      if(lb && lb.classList.contains('show')) return;
+      const midY = window.innerHeight / 2;
+      let target = null;
+      pagers.forEach(obj=>{
+        const r = obj.pager.getBoundingClientRect();
+        if(r.top <= midY && r.bottom >= midY) target = obj;
+      });
+      if(!target || target.pages <= 1) return;
+      e.preventDefault();
+      target.go(e.key === 'ArrowLeft' ? target.cur - 1 : target.cur + 1);
+    });
+  })();
+  </script>
  </body>
 </html>
