@@ -453,37 +453,44 @@ html, body { max-width:100%; overflow-x:clip; }
 .pp-page > .pp-row:last-child { padding-bottom:0; }
 .pp-row .pp-blockhead { margin:0 0 8px; }
 
-/* label bar: label (+ range) left, arrows + counter right; bottom bar centered */
+/* label bar: label (+ row range) on the left */
 .pp-pagenav { font-family:'Google Sans', sans-serif; }
 .pp-pagenav-top { display:flex; justify-content:space-between; align-items:center; gap:10px;
   flex-wrap:wrap; margin:0 0 8px; }
 .pp-pagerleft { display:flex; align-items:center; gap:10px; flex-wrap:wrap; min-width:0; }
-.pp-pagectrls { display:flex; align-items:center; gap:10px; }
 .pp-pagerlabel { font-size:12px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:#6b7280; }
 .pp-pagesep { color:#d1d5db; }
-.pp-pagecount, .pp-pagerange { color:#6b7280; font-size:13px; }
+.pp-pagerange { color:#6b7280; font-size:13px; }
 .pp-pagecur { font-variant-numeric:tabular-nums; }
 
-.pp-pagebtn { width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center;
-  font-size:20px; line-height:1; padding:0; border-radius:0; cursor:pointer;
-  background:#fff; border:1px solid #d1d5db; color:#374151; }
-@media(hover:hover){ .pp-pagebtn:hover { border-color:var(--accent); color:var(--accent); } }
-.pp-pagebtn:disabled { opacity:.35; pointer-events:none; }
 
 /* dark theme + showcase band */
 :is(html.theme-dark,.pp-band) .pp-pager {
   background:#121212; border:1px solid #262626; box-shadow:0 4px 12px rgba(0,0,0,.45); }
 :is(html.theme-dark,.pp-band) .pp-pagerlabel { color:#9ca3af; }
 :is(html.theme-dark,.pp-band) .pp-pagesep { color:#3a3a3a; }
-:is(html.theme-dark,.pp-band) .pp-pagecount,
 :is(html.theme-dark,.pp-band) .pp-pagerange { color:#9ca3af; }
-:is(html.theme-dark,.pp-band) .pp-pagebtn { background:#141414; border:1px solid #333; color:#d1d5db; }
-@media(hover:hover){ :is(html.theme-dark,.pp-band) .pp-pagebtn:hover { border-color:var(--accent); color:var(--accent); } }
+@media (max-width:768px) { .pp-pager { padding:12px; } }
 
-@media (max-width:768px) {
-  .pp-pager { padding:12px; }
-  .pp-pagebtn { width:32px; height:32px; }
-}
+/* slideshow controls (2026-10-09): round arrows floating at mid-height beside the rows, dots + counter under them */
+.pp-slideshow { position:relative; }
+.pp-ss-arrow { position:absolute; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; padding:0; cursor:pointer; user-select:none; z-index:2;
+  font-size:15px; line-height:1; background:rgba(0,0,0,.42); border:none; color:#fff; }
+@media(hover:hover){ .pp-ss-arrow:hover { background:rgba(0,0,0,.78); color:#fff; } }
+/* fully outside the card (12px gap) when the viewport has room; inside the rows otherwise */
+.pp-ss-arrow.pp-prev { left:-70px; } .pp-ss-arrow.pp-next { right:-70px; }
+@media (max-width:1340px) { .pp-ss-arrow.pp-prev { left:6px; } .pp-ss-arrow.pp-next { right:6px; } }
+.pp-ss-dots { margin-top:12px; text-align:center; line-height:1; }
+.pp-ss-dot { display:inline-block; width:7px; height:7px; margin:0 3px; border-radius:50%; background:#cfcfcf; cursor:pointer; vertical-align:middle; }
+.pp-ss-dot.on { background:#363636; }
+.pp-ss-count { font-family:'Google Sans', sans-serif; font-size:12px; color:#777; margin-left:8px; vertical-align:middle; }
+:is(html.theme-dark,.pp-band) .pp-ss-arrow { background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.22); color:#f3f4f6; }
+@media(hover:hover){ :is(html.theme-dark,.pp-band) .pp-ss-arrow:hover { background:var(--accent); border-color:var(--accent); color:#111; } }
+:is(html.theme-dark,.pp-band) .pp-ss-dot { background:#3f3f46; }
+:is(html.theme-dark,.pp-band) .pp-ss-dot.on { background:#e5e7eb; }
+:is(html.theme-dark,.pp-band) .pp-ss-count { color:#9ca3af; }
+@media (max-width:768px) { .pp-ss-arrow { width:32px; height:32px; font-size:13px; } }
 </style>
 <title>SEGUE: Visual Signal as Exclusive Guidance for One-Shot Transition Effect Generation (results gallery)</title>
 <meta name="description" content="Full results gallery for SEGUE: transition effect generation and visual effect transfer, comparisons with previous work, guidance and limitations. Show SEGUE a transition effect in one reference clip, and it generates that effect between any two video clips. It reads the effect strictly from the visual reference, with no effect description in the prompt, and one model covers both two-sided transitions and single-sided visual effect transfer."/>
@@ -606,18 +613,16 @@ html, body { max-width:100%; overflow-x:clip; }
 
       function updateNavs(){
         pager.querySelectorAll('.pp-pagecur').forEach(el=>{ el.textContent = cur; });
-        const a = (cur - 1) * size + 1;
-        const b = Math.min(cur * size, total);
-        pager.querySelectorAll('.pp-pagerange').forEach(el=>{ el.textContent = 'Rows ' + a + '–' + b + ' of ' + total; });
-        pager.querySelectorAll('.pp-prev').forEach(btn=>{ btn.disabled = (cur === 1); });
-        pager.querySelectorAll('.pp-next').forEach(btn=>{ btn.disabled = (cur === pages); });
+        pager.querySelectorAll('.pp-ss-dot').forEach((d, i)=>{ d.classList.toggle('on', i + 1 === cur); });
       }
       function scheduleWarm(){
         if(warmTimer) clearTimeout(warmTimer);
         warmTimer = setTimeout(()=>{ warm(pageDivs[cur]); }, 1500);   // pageDivs[cur] = page cur+1 (the next one)
       }
       function show(p){
-        if(p < 1 || p > pages || p === cur) return;
+        if(pages <= 1) return;
+        p = ((p - 1 + pages) % pages) + 1;   // wraps around like a slideshow
+        if(p === cur) return;
         cur = p;
         pagesEl.classList.add('is-switching');
         setTimeout(()=>{
@@ -634,6 +639,7 @@ html, body { max-width:100%; overflow-x:clip; }
 
       pager.querySelectorAll('.pp-prev').forEach(b=> b.addEventListener('click', ()=> show(cur - 1)));
       pager.querySelectorAll('.pp-next').forEach(b=> b.addEventListener('click', ()=> show(cur + 1)));
+      pager.querySelectorAll('.pp-ss-dot').forEach(d=> d.addEventListener('click', ()=> show(parseInt(d.dataset.go, 10))));
 
       if('ontouchstart' in window){
         let sx = 0, sy = 0;
