@@ -155,6 +155,7 @@
 .pp-blockhead{font-size:16px;font-weight:600;color:#fff;margin:24px 0 2px}
 .pp-method{margin:18px auto 24px;max-width:1000px}
 .pp-method img{width:100%;height:auto;border-radius:8px;display:block}
+.pp-fig-link{display:block;cursor:zoom-in}
 .pp-figcap{text-align:center;color:#aaa;font-size:13px;margin-top:10px}
 .pp-footer-supp{margin:46px 0 12px;padding:22px 24px;border:1px solid #2a2a2a;border-radius:12px;background:#0d0d0d;text-align:center}
 .pp-footer-supp a{color:#9cc3ff;text-decoration:none;font-size:18px;font-weight:600}
@@ -369,12 +370,13 @@ html, body { max-width:100%; overflow-x:clip; }
 .pp-nrg-row .seg-arrow { height:auto; align-self:center; }
 .pp-nrg-row .seg-strip { padding-bottom:10px; }
 .pp-nrg-row .seg-cellsrow { padding-bottom:0; align-items:flex-start; }
-@media (max-width:768px) { .pp-nrg-row .seg-cellsrow { flex-wrap:wrap; } .pp-nrg-row .seg-unit { flex:1 1 30%; } }
+/* phones and tablets: the guidance row uses the grid in pp-responsive below */
 </style>
 <style id="pp-full-rows">
 /* comparison rows (with --full-rows) + the guidance row at full width on desktop: every clip visible, no slider.
-   The endpoint stack takes half a column so its two stacked clips add up to one clip height. */
-@media (min-width:769px) {
+   The endpoint stack takes half a column so its two stacked clips add up to one clip height.
+   2026-11-16: from 1024px up; below that the rows use the grid in pp-responsive. */
+@media (min-width:1024px) {
   .pp-full-rows .seg-strip { overflow:visible; padding-bottom:10px; }
   .pp-full-rows .seg-cellsrow { overflow:visible; flex-wrap:nowrap; gap:12px; padding-bottom:0; align-items:flex-start; }
   .pp-full-rows .seg-unit { flex:1 1 0; min-width:0; width:100%; }
@@ -412,8 +414,10 @@ html, body { max-width:100%; overflow-x:clip; }
 :is(html.theme-dark,.pp-band) .pp-method-p b { color:#f3f4f6; }
 </style>
 <style id="pp-buttons-row">
-/* header buttons on ONE row on desktop (2026-10-08): tighter pills, no wrapping above the phone breakpoint */
-@media (min-width:769px) {
+/* header buttons on ONE row on desktop (2026-10-08): tighter pills, no wrapping.
+   2026-11-16: from 1024px up only (at 769-1023px the single row was wider than the screen and got
+   cut off); tablets wrap, phones use the two-column grid in pp-responsive. */
+@media (min-width:1024px) {
   .btn-fancy-container { flex-wrap:nowrap; gap:10px; }
   .btn-fancy { padding:10px 18px; font-size:.95rem; white-space:nowrap; }
   .btn-fancy .icon { margin-right:8px; }
@@ -472,16 +476,20 @@ html, body { max-width:100%; overflow-x:clip; }
 :is(html.theme-dark,.pp-band) .pp-pagerange { color:#9ca3af; }
 @media (max-width:768px) { .pp-pager { padding:12px; } }
 
-/* slideshow controls (2026-10-09): round arrows floating at mid-height beside the rows, dots + counter under them */
+/* slideshow controls (2026-10-09): round arrows + dots + counter.
+   2026-11-16: the arrows live in the dots bar under the rows (never on top of the clips); only when
+   the screen is wide enough (1341px+) do they float at mid-height fully outside the card. */
+.pp-pager { position:relative; }
 .pp-slideshow { position:relative; }
-.pp-ss-arrow { position:absolute; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center; padding:0; cursor:pointer; user-select:none; z-index:2;
-  font-size:15px; line-height:1; background:rgba(0,0,0,.42); border:none; color:#fff; }
+.pp-ss-arrow { position:static; flex:none; width:34px; height:34px; margin:0 10px; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center; padding:0; cursor:pointer; user-select:none; z-index:2;
+  font-size:14px; line-height:1; background:rgba(0,0,0,.42); border:none; color:#fff; }
 @media(hover:hover){ .pp-ss-arrow:hover { background:rgba(0,0,0,.78); color:#fff; } }
-/* fully outside the card (12px gap) when the viewport has room; inside the rows otherwise */
-.pp-ss-arrow.pp-prev { left:-70px; } .pp-ss-arrow.pp-next { right:-70px; }
-@media (max-width:1340px) { .pp-ss-arrow.pp-prev { left:6px; } .pp-ss-arrow.pp-next { right:6px; } }
-.pp-ss-dots { margin-top:12px; text-align:center; line-height:1; }
+@media (min-width:1341px) {
+  .pp-ss-arrow { position:absolute; top:50%; transform:translateY(-50%); width:36px; height:36px; margin:0; font-size:15px; }
+  .pp-ss-arrow.pp-prev { left:-50px; } .pp-ss-arrow.pp-next { right:-50px; }
+}
+.pp-ss-dots { margin-top:14px; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; row-gap:6px; line-height:1; }
 .pp-ss-dot { display:inline-block; width:7px; height:7px; margin:0 3px; border-radius:50%; background:#cfcfcf; cursor:pointer; vertical-align:middle; }
 .pp-ss-dot.on { background:#363636; }
 .pp-ss-count { font-family:'Google Sans', sans-serif; font-size:12px; color:#777; margin-left:8px; vertical-align:middle; }
@@ -490,7 +498,54 @@ html, body { max-width:100%; overflow-x:clip; }
 :is(html.theme-dark,.pp-band) .pp-ss-dot { background:#3f3f46; }
 :is(html.theme-dark,.pp-band) .pp-ss-dot.on { background:#e5e7eb; }
 :is(html.theme-dark,.pp-band) .pp-ss-count { color:#9ca3af; }
-@media (max-width:768px) { .pp-ss-arrow { width:32px; height:32px; font-size:13px; } }
+</style>
+<style id="pp-responsive">
+/* 2026-11-16: phones and tablets (up to 1023px). Nothing scrolls sideways inside a card:
+   - gallery rows: the reference on its own line, then one "start/end -> SEGUE" line per sample
+     (one column on phones, two or three on tablets); clip sizes follow the card width;
+   - comparison, guidance and limitation rows: a grid with the inputs first, a down arrow, then the
+     outputs (two columns on phones, four on tablets);
+   - header: authors a little smaller and the buttons in an even two-column grid on phones.
+   Desktop (1024px and up) is unchanged. */
+@media (max-width:1023px) {
+  .seg-blockwrap, .seg-strip { overflow-x:visible; }
+
+  /* gallery rows */
+  .seg-blockwrap .seg-block { min-width:0; display:flex; flex-direction:column; align-items:stretch; gap:16px; }
+  .seg-blockwrap .seg-block > .seg-ref { align-self:center; width:min(56%, 200px); }
+  .seg-blockwrap .seg-cells { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap:16px 22px; }
+  .seg-blockwrap .seg-cellwrap { min-width:0; width:100%; }
+  .seg-blockwrap .pp-cell-empty { display:none; }
+  .seg-blockwrap .seg-cell { width:100%; gap:8px; }
+  .seg-blockwrap .seg-cell .seg-endstack { flex:0.5 1 0; min-width:0; }
+  .seg-blockwrap .seg-cell .seg-gen { flex:1 1 0; min-width:0; }
+  .seg-blockwrap .seg-cell .seg-unit, .seg-blockwrap .seg-stack { width:100%; }
+  .seg-blockwrap .seg-media, .seg-blockwrap .seg-noend { width:100%; height:auto !important; aspect-ratio:3/4; }
+  .seg-blockwrap .seg-arrow { height:auto; align-self:center; }
+  .seg-blockwrap .seg-celllabel { max-width:none; }
+
+  /* comparison / guidance / limitation rows */
+  .seg-strip .seg-cellsrow { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:12px;
+    overflow:visible; padding-bottom:0; align-items:start; }
+  .seg-strip .seg-unit { width:100%; min-width:0; }
+  .seg-strip .seg-media, .seg-strip .seg-noend { width:100%; height:auto !important; aspect-ratio:3/4; }
+  .seg-strip .seg-endstack .seg-stack { width:50%; margin:0 auto; }   /* the two stacked clips = one clip tall */
+  .seg-strip .seg-arrow { grid-column:1 / -1; justify-content:center; align-self:center; height:auto;
+    padding:0; margin:-4px 0; font-size:0; }
+  .seg-strip .seg-arrow::after { content:"\2193"; font-size:20px; line-height:1; }
+}
+@media (max-width:600px) {
+  .seg-strip .seg-cellsrow { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; }
+}
+@media (max-width:768px) {
+  .authors-fancy { font-size:1.05rem; line-height:1.8; }
+  .authors-fancy .author-block { margin:0 6px; }
+  .btn-fancy-container { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px;
+    max-width:380px; margin-left:auto; margin-right:auto; }
+  .btn-fancy { justify-content:center; min-width:0; padding:10px 8px; font-size:.9rem; white-space:nowrap; }
+  .btn-fancy .icon { width:1.1em; margin-right:7px; }
+  .btn-fancy .pp-soon { display:none; }
+}
 </style>
 <title>SEGUE: Visual Signal as Exclusive Guidance for One-Shot Transition Effect Generation (results gallery)</title>
 <meta name="description" content="Full results gallery for SEGUE: transition effect generation and visual effect transfer, comparisons with previous work, guidance and limitations. Show SEGUE a transition effect in one reference clip, and it generates that effect between any two video clips. It reads the effect strictly from the visual reference, with no effect description in the prompt, and one model covers both two-sided transitions and single-sided visual effect transfer."/>
@@ -531,145 +586,174 @@ html, body { max-width:100%; overflow-x:clip; }
   </script>
 
   <script>
-    (function(){
-      const inView = new IntersectionObserver((entries)=>{
-        for (const e of entries){
-          const v = e.target;
-          if (e.isIntersecting){
+  /* Video loading (2026-11-16). Every clip is in one of three zones around the screen:
+       near : within one screen of the viewport  -> source attached (metadata only), first frame ready
+       view : on screen                          -> playing; leaving the screen pauses it
+       far  : more than 2.5 screens away         -> released (source removed, decoder + buffer freed)
+     A clip is (re)loaded only when its source was released, so scrolling back never restarts it.
+     Clips on a hidden pager page are off screen too, so a page you leave is released by itself.
+     The pager below warms the NEXT page only while that pager is on screen. */
+  (function(){
+    const W = window;
+    function attach(v, preload){
+      if (v.dataset.att === '1'){ if (preload === 'auto' && v.preload !== 'auto') v.preload = 'auto'; return; }
+      v.querySelectorAll('source[data-src]').forEach(s=>{ s.src = s.dataset.src; });
+      v.preload = preload || 'metadata';
+      v.muted = true;
+      v.dataset.att = '1';
+      try{ v.load(); }catch(e){}
+    }
+    function release(v){
+      if (v.dataset.att !== '1') return;
+      if (!v.paused) v.pause();
+      v.querySelectorAll('source[data-src]').forEach(s=> s.removeAttribute('src'));
+      v.preload = 'none';
+      v.dataset.att = '';
+      v.dataset.inview = '';
+      try{ v.load(); }catch(e){}
+    }
+    function play(v){
+      if (v.dataset.autoplay !== 'true' && !v.autoplay) return;
+      attach(v);
+      v.muted = true;
+      const p = v.play(); if (p && typeof p.catch === 'function') p.catch(()=>{});
+    }
+    W.ppVideo = { attach: attach, release: release };
 
-            const sources = v.querySelectorAll('source[data-src]');
-            sources.forEach(s=>{
-              // keep data-src so a paged-out clip can be released and reloaded later;
-              // only (re)assign src when it is currently empty
-              if (!s.getAttribute('src')) s.src = s.dataset.src;
-            });
+    const vids = Array.prototype.slice.call(document.querySelectorAll('video.lazy-video'));
+    if (!('IntersectionObserver' in W)){            // very old browsers: just load and play everything
+      vids.forEach(v=>{ attach(v); play(v); });
+      return;
+    }
+    const near = new IntersectionObserver(es=>{ es.forEach(e=>{ if (e.isIntersecting) attach(e.target); }); },
+                                          { rootMargin:'100% 0px' });
+    const far  = new IntersectionObserver(es=>{ es.forEach(e=>{ if (!e.isIntersecting) release(e.target); }); },
+                                          { rootMargin:'250% 0px' });
+    const view = new IntersectionObserver(es=>{ es.forEach(e=>{
+      const v = e.target;
+      if (e.isIntersecting){ v.dataset.inview = '1'; play(v); }
+      else { v.dataset.inview = ''; if (!v.paused) v.pause(); }
+    }); });
+    vids.forEach(v=>{ v.preload = 'none'; near.observe(v); far.observe(v); view.observe(v); });
 
-            if (v.preload === 'none') v.preload = 'metadata';
-            v.muted = true;
-            v.load();
-            const tryPlay = ()=>{ if (v.dataset.autoplay === 'true' || v.autoplay){ v.play().catch(()=>{}); } };
-            tryPlay();
-            v.addEventListener('canplay', tryPlay, { once:true });
-            v.dataset.inview = '1';
-          }else{
-            v.dataset.inview = '';
-            if (!v.paused) v.pause();
-          }
-        }
-      }, { rootMargin: '200px 0px' });
-
-      // iOS Low Power Mode and some Android browsers block autoplay until a user gesture:
-      // on the first touch/click, (re)start every clip that is in view and paused.
-      const kick = ()=>{
-        document.querySelectorAll('video.lazy-video[data-inview="1"]').forEach(v=>{
-          if (v.paused){ v.muted = true; v.play().catch(()=>{}); }
-        });
-      };
-      document.addEventListener('touchstart', kick, { passive:true });
-      document.addEventListener('click', kick, { passive:true });
-
-      document.querySelectorAll('video.lazy-video').forEach(v=>{
-
-        v.preload = 'none';
-        inView.observe(v);
-      });
-
-    })();
-    </script>
+    // iOS Low Power Mode and some Android browsers block autoplay until a user gesture:
+    // on the first touch/click, (re)start every clip that is on screen and paused.
+    const kick = ()=>{ document.querySelectorAll('video.lazy-video[data-inview="1"]').forEach(v=>{ if (v.paused) play(v); }); };
+    document.addEventListener('touchstart', kick, { passive:true });
+    document.addEventListener('click', kick, { passive:true });
+  })();
+  </script>
 
   <script>
-  /* Row pager (2026-10-09): one card per gallery/comparison group; pages of three rows with a
-     cross-fade on switch, media released when a page is hidden and the next page warmed ahead.
-     Coordinated with the lazy-video loader above, which keeps data-src and only sets src when
-     empty, so a source can be released and reloaded. Controls appear only for multi-page pagers. */
+  /* Row pager (2026-10-09, loading reworked 2026-11-16): one card per gallery / comparison group,
+     pages of rows with a cross-fade on switch. The loader above releases a page's clips once the
+     page is hidden; this script only warms the next page, and only while its pager is on screen.
+     Swipe left/right on the rows to change page (ignored when the swipe scrolls something sideways). */
   (function(){
     const pagers = [];
-    function loadSources(v){
-      v.querySelectorAll('source[data-src]').forEach(s=>{ if(!s.getAttribute('src')) s.src = s.dataset.src; });
-    }
-    function warm(pg){
-      if(!pg) return;
-      pg.querySelectorAll('video.lazy-video').forEach(v=>{
-        loadSources(v); v.preload = 'auto'; v.muted = true; try{ v.load(); }catch(e){}
-      });
-    }
-    function release(pg){
-      if(!pg) return;
-      pg.querySelectorAll('video.lazy-video').forEach(v=>{
-        if(!v.paused) v.pause();
-        v.querySelectorAll('source').forEach(s=> s.removeAttribute('src'));
-        v.preload = 'none';
-        try{ v.load(); }catch(e){}
-      });
+    const V = window.ppVideo;
+    function hScrolls(el, stop){
+      for (; el && el !== stop; el = el.parentElement){
+        if (el.scrollWidth > el.clientWidth + 2){
+          const ox = getComputedStyle(el).overflowX;
+          if (ox === 'auto' || ox === 'scroll') return true;
+        }
+      }
+      return false;
     }
     function initPager(pager){
       const pagesEl = pager.querySelector('.pp-pages');
       const pageDivs = Array.prototype.slice.call(pager.querySelectorAll('.pp-page'));
       const pages = pageDivs.length;
-      const size = parseInt(pager.dataset.size, 10) || 3;
-      const total = parseInt(pager.dataset.total, 10) || pageDivs.length;
-      let cur = 1;
-      let warmTimer = null;
+      let cur = 1, warmTimer = null, onScreen = false, warmed = null;
 
       function updateNavs(){
         pager.querySelectorAll('.pp-pagecur').forEach(el=>{ el.textContent = cur; });
         pager.querySelectorAll('.pp-ss-dot').forEach((d, i)=>{ d.classList.toggle('on', i + 1 === cur); });
       }
+      function unwarm(){           // drop the warmed page unless it has become the visible one
+        if (warmed && warmed.hidden) warmed.querySelectorAll('video.lazy-video').forEach(V.release);
+        warmed = null;
+      }
       function scheduleWarm(){
-        if(warmTimer) clearTimeout(warmTimer);
-        warmTimer = setTimeout(()=>{ warm(pageDivs[cur]); }, 1500);   // pageDivs[cur] = page cur+1 (the next one)
+        clearTimeout(warmTimer);
+        if (!onScreen || pages <= 1 || !V) return;
+        warmTimer = setTimeout(()=>{
+          if (!onScreen) return;
+          const next = pageDivs[cur % pages];            // the page after the current one (wraps to 1)
+          if (next === warmed) return;
+          unwarm();
+          next.querySelectorAll('video.lazy-video').forEach(v=> V.attach(v, 'auto'));
+          warmed = next;
+        }, 1200);
+      }
+      function setOnScreen(on){
+        onScreen = on;
+        if (on) scheduleWarm(); else { clearTimeout(warmTimer); unwarm(); }
       }
       function show(p){
-        if(pages <= 1) return;
+        if (pages <= 1) return;
         p = ((p - 1 + pages) % pages) + 1;   // wraps around like a slideshow
-        if(p === cur) return;
+        if (p === cur) return;
         cur = p;
         pagesEl.classList.add('is-switching');
         setTimeout(()=>{
           pageDivs.forEach((pg, i)=>{ pg.hidden = (i + 1 !== cur); });
-          // release every page that is neither the current one nor the one kept warm after it
-          pageDivs.forEach((pg, i)=>{ const n = i + 1; if(n !== cur && n !== cur + 1) release(pg); });
           updateNavs();
           pagesEl.classList.remove('is-switching');
+          if (warmed && !warmed.hidden) warmed = null;   // the warmed page is now the visible one
+          // free the page(s) just hidden right away (the loader would also do it, a frame later)
+          if (V) pageDivs.forEach(pg=>{ if (pg.hidden && pg !== warmed) pg.querySelectorAll('video.lazy-video').forEach(V.release); });
+          scheduleWarm();
         }, 80);
         const rect = pager.getBoundingClientRect();
-        if(rect.top < 0) pager.scrollIntoView({ behavior:'smooth', block:'start' });
-        scheduleWarm();
+        if (rect.top < 0) pager.scrollIntoView({ behavior:'smooth', block:'start' });
       }
 
       pager.querySelectorAll('.pp-prev').forEach(b=> b.addEventListener('click', ()=> show(cur - 1)));
       pager.querySelectorAll('.pp-next').forEach(b=> b.addEventListener('click', ()=> show(cur + 1)));
       pager.querySelectorAll('.pp-ss-dot').forEach(d=> d.addEventListener('click', ()=> show(parseInt(d.dataset.go, 10))));
 
-      if('ontouchstart' in window){
-        let sx = 0, sy = 0;
-        pagesEl.addEventListener('touchstart', e=>{ const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; }, { passive:true });
+      if ('ontouchstart' in window){
+        let sx = 0, sy = 0, sideScroll = false;
+        pagesEl.addEventListener('touchstart', e=>{
+          const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY;
+          sideScroll = hScrolls(e.target, pagesEl);
+        }, { passive:true });
         pagesEl.addEventListener('touchend', e=>{
+          if (sideScroll) return;
           const t = e.changedTouches[0]; const dx = t.clientX - sx, dy = t.clientY - sy;
-          if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) show(dx < 0 ? cur + 1 : cur - 1);
+          if (Math.abs(dx) > 60 && Math.abs(dx) > 1.5 * Math.abs(dy)) show(dx < 0 ? cur + 1 : cur - 1);
         }, { passive:true });
       }
 
       updateNavs();
-      scheduleWarm();
-      pagers.push({ pager: pager, pages: pages, go: show, get cur(){ return cur; } });
+      const obj = { pager: pager, pages: pages, go: show, setOnScreen: setOnScreen, get cur(){ return cur; } };
+      pager._pp = obj;
+      pagers.push(obj);
     }
 
     document.querySelectorAll('.pp-pager').forEach(initPager);
 
+    if ('IntersectionObserver' in window){
+      const seen = new IntersectionObserver(es=>{ es.forEach(e=>{ if (e.target._pp) e.target._pp.setOnScreen(e.isIntersecting); }); },
+                                            { rootMargin:'25% 0px' });
+      pagers.forEach(o=> seen.observe(o.pager));
+    }
+
     document.addEventListener('keydown', e=>{
-      if(e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
       const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
-      if(tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
       const lb = document.getElementById('lightbox');
-      if(lb && lb.classList.contains('show')) return;
+      if (lb && lb.classList.contains('show')) return;
       const midY = window.innerHeight / 2;
       let target = null;
       pagers.forEach(obj=>{
         const r = obj.pager.getBoundingClientRect();
-        if(r.top <= midY && r.bottom >= midY) target = obj;
+        if (r.top <= midY && r.bottom >= midY) target = obj;
       });
-      if(!target || target.pages <= 1) return;
+      if (!target || target.pages <= 1) return;
       e.preventDefault();
       target.go(e.key === 'ArrowLeft' ? target.cur - 1 : target.cur + 1);
     });
