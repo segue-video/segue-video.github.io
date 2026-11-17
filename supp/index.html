@@ -499,6 +499,13 @@ html, body { max-width:100%; overflow-x:clip; }
 :is(html.theme-dark,.pp-band) .pp-ss-dot.on { background:#e5e7eb; }
 :is(html.theme-dark,.pp-band) .pp-ss-count { color:#9ca3af; }
 </style>
+<style id="pp-screen-fit">
+/* 2026-11-16: on desktop the two results-gallery cards hug their rows and sit centred, so when the
+   screen-fit script (end of page) makes the clips smaller the card shrinks with them, no empty space. */
+@media (min-width:1024px) {
+  .seg-section > .pp-pager:is(#pager-teg, #pager-vet) { width:fit-content; max-width:100%; margin-left:auto; margin-right:auto; }
+}
+</style>
 <style id="pp-responsive">
 /* 2026-11-16: phones and tablets (up to 1023px). Nothing scrolls sideways inside a card:
    - gallery rows: the reference on its own line, then one "start/end -> SEGUE" line per sample
@@ -533,6 +540,9 @@ html, body { max-width:100%; overflow-x:clip; }
   .seg-strip .seg-arrow { grid-column:1 / -1; justify-content:center; align-self:center; height:auto;
     padding:0; margin:-4px 0; font-size:0; }
   .seg-strip .seg-arrow::after { content:"\2193"; font-size:20px; line-height:1; }
+  /* rows stacked vertically: a thin line between rows so each reference reads as one group (2026-11-17) */
+  .pp-pager .pp-row + .pp-row { border-top:1px solid #e5e7eb; padding-top:18px; }
+  :is(html.theme-dark,.pp-band) .pp-pager .pp-row + .pp-row { border-top-color:rgba(255,255,255,.14); }
 }
 @media (max-width:600px) {
   .seg-strip .seg-cellsrow { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; }
@@ -586,15 +596,18 @@ html, body { max-width:100%; overflow-x:clip; }
   </script>
 
   <script>
-  /* Video loading (2026-11-16). Every clip is in one of three zones around the screen:
-       near : within one screen of the viewport  -> source attached (metadata only), first frame ready
-       view : on screen                          -> playing; leaving the screen pauses it
-       far  : more than 2.5 screens away         -> released (source removed, decoder + buffer freed)
-     A clip is (re)loaded only when its source was released, so scrolling back never restarts it.
-     Clips on a hidden pager page are off screen too, so a page you leave is released by itself.
+  /* Video loading (2026-11-16, per row since 2026-11-17). Clips are handled per ROW (a reference with
+     its samples, a comparison row, a guidance strip) so the clips of one row start together.
+     Each row is in one of three zones around the screen:
+       near : within one screen of the viewport -> sources attached and buffered
+       view : on screen                         -> as soon as every clip of the row can play, all start
+                                                   in the same moment; leaving the screen pauses the row
+       far  : more than 2.5 screens away        -> released (sources removed, decoder + buffer freed)
+     Only the start is lined up; afterwards each clip loops on its own (no re-syncing, no lag).
+     Rows on a hidden pager page are off screen too, so a page you leave is released by itself.
      The pager below warms the NEXT page only while that pager is on screen. */
   (function(){
-    const W = window;
+    const W = window, WAIT = 2500;   // ms: a row never waits longer than this for one slow clip
     function attach(v, preload){
       if (v.dataset.att === '1'){ if (preload === 'auto' && v.preload !== 'auto') v.preload = 'auto'; return; }
       v.querySelectorAll('source[data-src]').forEach(s=>{ s.src = s.dataset.src; });
@@ -609,36 +622,56 @@ html, body { max-width:100%; overflow-x:clip; }
       v.querySelectorAll('source[data-src]').forEach(s=> s.removeAttribute('src'));
       v.preload = 'none';
       v.dataset.att = '';
-      v.dataset.inview = '';
       try{ v.load(); }catch(e){}
     }
-    function play(v){
-      if (v.dataset.autoplay !== 'true' && !v.autoplay) return;
-      attach(v);
-      v.muted = true;
-      const p = v.play(); if (p && typeof p.catch === 'function') p.catch(()=>{});
-    }
+    function play(v){ v.muted = true; const p = v.play(); if (p && typeof p.catch === 'function') p.catch(()=>{}); }
     W.ppVideo = { attach: attach, release: release };
 
-    const vids = Array.prototype.slice.call(document.querySelectorAll('video.lazy-video'));
-    if (!('IntersectionObserver' in W)){            // very old browsers: just load and play everything
-      vids.forEach(v=>{ attach(v); play(v); });
+    // group the clips by row
+    const rows = [];
+    document.querySelectorAll('video.lazy-video').forEach(v=>{
+      const row = v.closest('.seg-blockwrap, .seg-strip') || v;
+      if (!row._pp){ row._pp = { vids: [], tok: 0, inview: false }; rows.push(row); }
+      row._pp.vids.push(v);
+    });
+    function attachRow(row){ row._pp.vids.forEach(v=> attach(v, 'auto')); }
+    function releaseRow(row){ row._pp.tok++; row._pp.vids.forEach(release); }
+    function stopRow(row){ row._pp.tok++; row._pp.vids.forEach(v=>{ if (!v.paused) v.pause(); }); }
+    function startRow(row){
+      const R = row._pp, tok = ++R.tok;
+      const vs = R.vids.filter(v=> v.dataset.autoplay === 'true' || v.autoplay);
+      let started = false;
+      const go = ()=>{ if (started || tok !== R.tok) return; started = true; vs.forEach(play); };
+      vs.forEach(v=> attach(v, 'auto'));
+      const waiting = vs.filter(v=> v.readyState < 3);        // 3 = enough data to start playing
+      if (!waiting.length) return go();
+      let left = waiting.length;
+      waiting.forEach(v=>{
+        v.addEventListener('canplay', ()=>{ if (--left <= 0) go(); }, { once:true });
+        // phones (iOS) only buffer a clip once it plays: start it muted and hold it until the row is ready
+        v.addEventListener('playing', ()=>{ if (!started && tok === R.tok) v.pause(); }, { once:true });
+        play(v);
+      });
+      setTimeout(go, WAIT);
+    }
+
+    if (!('IntersectionObserver' in W)){              // very old browsers: just load and play everything
+      rows.forEach(r=>{ attachRow(r); startRow(r); });
       return;
     }
-    const near = new IntersectionObserver(es=>{ es.forEach(e=>{ if (e.isIntersecting) attach(e.target); }); },
+    const near = new IntersectionObserver(es=>{ es.forEach(e=>{ if (e.isIntersecting) attachRow(e.target); }); },
                                           { rootMargin:'100% 0px' });
-    const far  = new IntersectionObserver(es=>{ es.forEach(e=>{ if (!e.isIntersecting) release(e.target); }); },
+    const far  = new IntersectionObserver(es=>{ es.forEach(e=>{ if (!e.isIntersecting) releaseRow(e.target); }); },
                                           { rootMargin:'250% 0px' });
     const view = new IntersectionObserver(es=>{ es.forEach(e=>{
-      const v = e.target;
-      if (e.isIntersecting){ v.dataset.inview = '1'; play(v); }
-      else { v.dataset.inview = ''; if (!v.paused) v.pause(); }
+      const row = e.target; row._pp.inview = e.isIntersecting;
+      if (e.isIntersecting) startRow(row); else stopRow(row);
     }); });
-    vids.forEach(v=>{ v.preload = 'none'; near.observe(v); far.observe(v); view.observe(v); });
+    rows.forEach(r=>{ r._pp.vids.forEach(v=>{ v.preload = 'none'; }); near.observe(r); far.observe(r); view.observe(r); });
 
     // iOS Low Power Mode and some Android browsers block autoplay until a user gesture:
-    // on the first touch/click, (re)start every clip that is on screen and paused.
-    const kick = ()=>{ document.querySelectorAll('video.lazy-video[data-inview="1"]').forEach(v=>{ if (v.paused) play(v); }); };
+    // on a touch/click, restart every on-screen row that has a paused clip.
+    const kick = ()=>{ rows.forEach(r=>{ if (r._pp.inview && r._pp.vids.some(v=> v.paused)) startRow(r); }); };
     document.addEventListener('touchstart', kick, { passive:true });
     document.addEventListener('click', kick, { passive:true });
   })();
@@ -757,6 +790,50 @@ html, body { max-width:100%; overflow-x:clip; }
       e.preventDefault();
       target.go(e.key === 'ArrowLeft' ? target.cur - 1 : target.cur + 1);
     });
+  })();
+  </script>
+
+  <script>
+  /* Gallery fit (2026-11-16). On desktop (1024px and wider) each results gallery, with its title and
+     caption, fits on one screen: the clip height is measured from the real layout and set between
+     MIN and the default 300px, so tall screens look as before and smaller screens get smaller clips.
+     It also keeps a row from being wider than the card. Both galleries share one size so they match.
+     Phones and tablets keep their own layout. */
+  (function(){
+    const MIN = 150, MAX = 300, ROWS = 2, MARGIN = 24;
+    const items = ['teg', 'vet'].map(k=>{
+      const pager = document.getElementById('pager-' + k);
+      const sec = pager && pager.closest('.seg-section');
+      const box = pager && pager.closest('.container');
+      const title = box && box.querySelector('h2');
+      return (sec && title) ? { pager: pager, sec: sec, title: title } : null;
+    }).filter(Boolean);
+    if (!items.length) return;
+
+    function size(it){ return parseFloat(getComputedStyle(it.sec).getPropertyValue('--seg-h')) || MAX; }
+    function once(){
+      let best = MAX;
+      items.forEach(it=>{
+        const s = size(it);
+        const tall = it.pager.getBoundingClientRect().bottom - it.title.getBoundingClientRect().top;
+        best = Math.min(best, (window.innerHeight - MARGIN - (tall - ROWS * s)) / ROWS);   // fit the height
+        it.pager.querySelectorAll('.pp-page:not([hidden]) .seg-blockwrap').forEach(row=>{   // fit the width
+          if (row.scrollWidth > row.clientWidth + 1) best = Math.min(best, s * row.clientWidth / row.scrollWidth - 2);
+        });
+      });
+      const v = Math.round(Math.max(MIN, Math.min(MAX, best))) + 'px';
+      items.forEach(it=> it.sec.style.setProperty('--seg-h', v));
+    }
+    function fit(){
+      if (window.innerWidth < 1024){ items.forEach(it=> it.sec.style.removeProperty('--seg-h')); return; }
+      items.forEach(it=> it.sec.style.removeProperty('--seg-h'));   // measure from the default size,
+      once(); once();                                                // then once more to settle labels
+    }
+    let raf = 0;
+    window.addEventListener('resize', ()=>{ cancelAnimationFrame(raf); raf = requestAnimationFrame(fit); });
+    window.addEventListener('load', fit);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    fit();
   })();
   </script>
  </body>
